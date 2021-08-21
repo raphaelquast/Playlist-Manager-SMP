@@ -385,10 +385,7 @@ function createMenuRight() {
 							else {
 								let pathAbs = path;
 								if (pathAbs.startsWith('.\\')) {pathAbs = pathAbs.replace('.\\', list.playlistsPath);}
-								else {
-									const relPathSplit = list.playlistsPath.length ? list.playlistsPath.split('\\').filter(Boolean) : null;
-									pathAbs = findRelPathInAbsPath(pathAbs, list.playlistsPath);
-								}
+								else {relPathSplit.forEach((folder) => {pathAbs = pathAbs.replace('..\\', folder + '\\');});}
 								bCheck = bCheck && !_isFile(pathAbs);
 							}
 							return bCheck;
@@ -461,22 +458,20 @@ function createMenuRightTop() {
 	{	// Playlist folder
 		menu.newEntry({entryText: 'Set playlists folder...', func: () => {
 			let input = '';
-			try {input = utils.InputBox(window.ID, 'Enter path', window.Name, list.properties['playlistPath'][1], true);}
+			try {input = utils.InputBox(window.ID, 'Enter path', window.Name, list.playlistsPath, true);}
 			catch (e) {return;}
 			if (!input.length) {return;}
 			if (input === list.playlistsPath) {return;}
 			if (!input.endsWith('\\')) {input += '\\';}
-			let bDone = _isFolder(input);
-			if (!bDone) {bDone = _createFolder(input);}
+			list.playlistsPath = input;
+			let bDone = _isFolder(list.playlistsPath);
+			if (!bDone) {bDone = _createFolder(list.playlistsPath);}
 			if (!bDone) {
-				fb.ShowPopupMessage('Path can not be found or created:\n\'' + input + '\'', window.Name);
+				fb.ShowPopupMessage('Path can not be found or created:\n\'' + list.playlistsPath + '\'', window.Name);
 				return;
 			}
 			// Update property to save between reloads
-			list.properties['playlistPath'][1] = input
-			list.playlistsPath = input.startsWith('.') ? findRelPathInAbsPath(input) : input;
-			list.playlistsPathDirName = list.playlistsPath.split('\\').filter(Boolean).pop();
-			list.playlistsPathDisk = list.playlistsPath.split('\\').filter(Boolean)[0].replace(':','').toUpperCase();
+			list.properties['playlistPath'][1] = list.playlistsPath;
 			overwriteProperties(list.properties);
 			list.checkConfig();
 			let test = new FbProfiler(window.Name + ': ' + 'Manual refresh');

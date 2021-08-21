@@ -42,7 +42,7 @@ function _panel(custom_background = false) {
 		this.fonts.normal = _gdiFont(name, this.fonts.size);
 		this.fonts.small = _gdiFont(name, this.fonts.size - 4);
 		this.fonts.fixed = _gdiFont('Lucida Console', this.fonts.size);
-		this.row_height = this.fonts.normal.Height;
+		this.row_height = this.fonts.normal.Height *1.3;
 		this.list_objects.forEach((item) => {item.size();});
 		this.list_objects.forEach((item) => {item.update();});
 		this.text_objects.forEach((item) => {item.size();});
@@ -71,7 +71,7 @@ function _panel(custom_background = false) {
 			break;
 		}
 
-		gr.FillSolidRect(1, 1, this.w - 1, this.h - 1, col);
+		gr.FillSolidRect(0, 0, this.w, this.h, col);
 	}
 	
 	window.DlgCode = DLGC_WANTALLKEYS;

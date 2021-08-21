@@ -21,9 +21,9 @@ function _list(x, y, w, h) {
 	// Font Awesome
 	const gfontIconChar = () => {return _gdiFont('FontAwesome', _scale(panel.fonts.size - 5), 0);};
 	// const iconCharHeader = '\uf015';
-	const iconCharPlaylistLocked = '\uf0f6';
-	const iconCharPlaylist = '\uf0f6';
-	const iconCharPlaylistEmpty = '\uf016';
+	const iconCharPlaylistLocked = '\u26d4';
+	const iconCharPlaylist = '\u25cf';
+	const iconCharPlaylistEmpty = '\u25cf';
 	// const iconCharPlaylistSelected = '\uf053';
 	
 	// Icons
@@ -32,7 +32,7 @@ function _list(x, y, w, h) {
 	// var iconCharPlaylistEmptyW = _gr.CalcTextWidth(iconCharPlaylist, gfontIconChar());
 	
 	// UI offset
-	const yOffset = _scale(6);
+	const yOffset = _scale(6)+10;
 	
 	// Header
 	var headerW = -1;
@@ -67,7 +67,9 @@ function _list(x, y, w, h) {
 	
 	this.headerTextUpdate = () => {
 		const bCategoryFilter = !isArrayEqual(this.categoryState, this.categories());
-		this.headerText = (this.playlistsPath && this.itemsAll) ? 'Playlists: ' + this.playlistsPathDirName + ' (' + this.itemsAll + ' pls.)' + (bCategoryFilter ? '[*]' : '') : 'Playlist Manager: empty folder';
+		//this.headerText = (this.playlistsPath && this.itemsAll) ? 'Playlists: ' + this.playlistsPathDirName + ' (' + this.itemsAll + ' pls.)' + (bCategoryFilter ? '[*]' : '') : 'Playlist Manager: empty folder';
+		this.headerText = 'Playlists: ';
+
 		if (this.w < _gr.CalcTextWidth(this.headerText, panel.fonts.title) + 15) {
 			this.headerText = this.headerText.replace('Playlists: ','').replace('Playlist Manager: ','');
 		}
@@ -83,6 +85,9 @@ function _list(x, y, w, h) {
 		// console.log(iconH % 2);
 		gr.GdiDrawText(iconChar, gfontWd2, blendColours(iconColour, panel.colours.background, 0.35), LM, -1, iconw, TM, LEFT);
 		gr.GdiDrawText(this.headerText, panel.fonts.title, panel.colours.highlight, LM + iconw + 5, 0, panel.w - (LM * 2), TM, LEFT);
+		
+		gr.GdiDrawText(this.playlistsPath, panel.fonts.small, panel.colours.highlight, 0, 0, panel.w, TM, RIGHT);
+
 		let lineY = (panel.fonts.size < 14 && iconH % 2) ? iconH + 2 : iconH + 1;
 		gr.DrawLine(this.x, lineY , this.x + this.w, lineY, 1, panel.colours.highlight);
 		headerW = LM + iconw + 5;
@@ -110,7 +115,7 @@ function _list(x, y, w, h) {
 		}
 		// List
 		const playing_char = String.fromCharCode(9654);
-		const loaded_char = String.fromCharCode(9644);
+		const loaded_char = "";//String.fromCharCode(9644);
 		const lockedPlaylistIconColour = blendColours(iconColour, this.colours.lockedPlaylistColour, 0.8);
 		const autoPlaylistIconColour = blendColours(RGB(...toRGB(0xFFFFFFFF)), this.colours.autoPlaylistColour, 0.8);
 		const categoryHeaderOffset = _scale(panel.fonts.size - 4);
@@ -132,28 +137,34 @@ function _list(x, y, w, h) {
 				if (dataKey.length){
 					// Show always current letter at top. Also shows number
 					if (indexSortStateOffset === -1 && i === 0) {
-						let sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey][0].toUpperCase() : '-';
+						//let sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey][0].toUpperCase() : '-';
+						let sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey] : '\u25c7';
 						if (!isNaN(sepLetter)) {sepLetter = '#';} // Group numbers
-						drawDottedLine(gr, this.x, this.y + yOffset + (i * panel.row_height), this.x + this.w - categoryHeaderOffset, this.y + yOffset + (i * panel.row_height) , 1, categoryHeaderLineColour, _scale(2));
-						gr.GdiDrawText(sepLetter, panel.fonts.small, categoryHeaderColour, this.x, this.y + yOffset + (i * panel.row_height) - panel.row_height / 2, this.text_width , panel.row_height , RIGHT);
+						//if (sepLetter != '\u25c7') {drawDottedLine(gr, this.x, this.y + yOffset, this.x + this.w - categoryHeaderOffset * 10, this.y + yOffset, 1, categoryHeaderLineColour, _scale(2));}
+						gr.GdiDrawText(sepLetter, panel.fonts.small, categoryHeaderColour, this.x + this.w - categoryHeaderOffset * 9, this.y + yOffset - panel.row_height / 2, this.text_width , panel.row_height , LEFT);
 					}
 					// The rest... note numbers are always at top or at bottom anyway
 					if (i < (Math.min(this.items, this.rows) - indexSortStateOffset) && i + indexSortStateOffset >= 0) {
-						const sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey][0].toUpperCase() : '-';
-						const nextsepLetter = (this.data[i + indexSortStateOffset + this.offset][dataKey].length) ? this.data[i + indexSortStateOffset + this.offset][dataKey][0] : '-';
-						if (sepLetter.toLowerCase() !== nextsepLetter && isNaN(sepLetter)) {
+						//const sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey][0].toUpperCase() : '-';
+						const sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey] : '-';
+						const sepCategory = (this.data[i + this.offset]['category'].length) ? this.data[i + this.offset]['category'] : '-';
+
+						const nextsepLetter = (this.data[i + indexSortStateOffset + this.offset][dataKey].length) ? this.data[i + indexSortStateOffset + this.offset][dataKey] : '-';
+						if (sepLetter !== nextsepLetter && isNaN(sepLetter)) {
 							let sepIndex = indexSortStateOffset < 0 ? i : i + indexSortStateOffset;
-							drawDottedLine(gr, this.x, this.y + yOffset + (sepIndex * panel.row_height), this.x + this.w - categoryHeaderOffset, this.y + yOffset + (sepIndex * panel.row_height) , 1, categoryHeaderLineColour, _scale(2));
-							gr.GdiDrawText(sepLetter, panel.fonts.small, categoryHeaderColour, this.x, this.y + yOffset + (sepIndex * panel.row_height) - panel.row_height / 2, this.text_width , panel.row_height , RIGHT);
+							drawDottedLine(gr, this.x, this.y + yOffset + (sepIndex * panel.row_height), this.x + this.w - categoryHeaderOffset * 10, this.y + yOffset + (sepIndex * panel.row_height) , 1, categoryHeaderLineColour, _scale(2));
+							gr.GdiDrawText(sepCategory, panel.fonts.small, categoryHeaderColour, this.x + this.w - categoryHeaderOffset * 9, this.y + yOffset + (sepIndex * panel.row_height) - panel.row_height / 2, this.text_width , panel.row_height , LEFT);
 						}
 					}
 					// Show always current letter at bottom. Also shows number
 					if (indexSortStateOffset === 1 && i === Math.min(this.items, this.rows) - 1) {
 						let sepIndex = i + indexSortStateOffset;
-						let sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey][0].toUpperCase() : '-';
+						let sepLetter = (this.data[i + this.offset][dataKey].length) ? this.data[i + this.offset][dataKey] : '-';
+						const sepCategory = (this.data[i + this.offset]['category'].length) ? this.data[i + this.offset]['category'] : '-';
+
 						if (!isNaN(sepLetter)) {sepLetter = '#';} // Group numbers
 						drawDottedLine(gr, this.x, this.y + yOffset + (sepIndex * panel.row_height), this.x + this.w - categoryHeaderOffset, this.y + yOffset + (sepIndex * panel.row_height) , 1, categoryHeaderLineColour, _scale(2));
-						gr.GdiDrawText(sepLetter, panel.fonts.small, categoryHeaderColour, this.x, this.y + yOffset + (sepIndex * panel.row_height) - panel.row_height / 2, this.text_width , panel.row_height , RIGHT);
+						gr.GdiDrawText(sepCategory, panel.fonts.small, categoryHeaderColour, this.x, this.y + yOffset + (sepIndex * panel.row_height) - panel.row_height / 2, this.text_width , panel.row_height , RIGHT);
 					}
 				}
 			}
@@ -186,8 +197,8 @@ function _list(x, y, w, h) {
 				// Icon
 				// gr.GdiDrawText(iconCharPlaylistSelected, gfontIconChar(), this.colours.selectedPlaylistColour, this.x + 5 + this.data[currSelIdx].width , this.y + yOffset + _scale(1) + ((((currSelIdx) ? currSelIdx : currSelOffset) - currSelOffset) * panel.row_height), this.text_width, panel.row_height, LEFT);
 				// Rectangle
-				const selWidth =  this.bShowSep ?  this.x + this.w - 20 :  this.x + this.w; // Adjust according to UI config
-				gr.DrawRect(this.x - 5, this.y + yOffset + ((((currSelIdx) ? currSelIdx : currSelOffset) - currSelOffset) * panel.row_height), selWidth, panel.row_height, 0, this.colours.selectedPlaylistColour);
+				const selWidth =  this.bShowSep ?  this.x + this.w - categoryHeaderOffset * 10 :  this.x + this.w; // Adjust according to UI config
+				gr.DrawRect(this.x - 5, this.y + yOffset + ((((currSelIdx) ? currSelIdx : currSelOffset) - currSelOffset) * panel.row_height) + panel.row_height*0.1, selWidth, panel.row_height - panel.row_height*0.2, 0, this.colours.selectedPlaylistColour);
 			}
 		}
 		// Up/down buttons
@@ -225,6 +236,7 @@ function _list(x, y, w, h) {
 	}
 	
 	this.simulateWheelToIndex = (toIndex, currentItemIndex = this.lastIndex, originalOffset = this.lastOffset) => {
+		console.log('simulateWheelToIndex');
 		this.index = toIndex;
 		let iDifference = currentItemIndex - originalOffset;
 		this.offset = 0;
@@ -327,18 +339,13 @@ function _list(x, y, w, h) {
 											if (this.bForbidDuplicates) {this.selPaths = {sel: selItemsPaths};}
 											bDup = true;
 										} else {
-											const relPathSplit = this.playlistsPath.length ? this.playlistsPath.split('\\').filter(Boolean) : null;
 											const selItemsRelPaths = selItemsPaths.map((path) => {return path.replace(this.playlistsPath, '.\\');});
 											const selItemsRelPathsTwo = selItemsPaths.map((path) => {return path.replace(this.playlistsPath, '');});
-											const selItemsRelPathsThree = selItemsPaths.map((path) => {return getRelPath(path, relPathSplit);});
 											if (filePaths.intersectionSize(new Set(selItemsRelPaths))) {
 												if (this.bForbidDuplicates) {this.selPaths = {sel: selItemsRelPaths};}
 												bDup = true;
 											} else if (filePaths.intersectionSize(new Set(selItemsRelPathsTwo))) {
 												if (this.bForbidDuplicates) {this.selPaths =  {sel: selItemsRelPathsTwo};}
-												bDup = true;
-											} else if (filePaths.intersectionSize(new Set(selItemsRelPathsThree))) {
-												if (this.bForbidDuplicates) {this.selPaths =  {sel: selItemsRelPathsThree};}
 												bDup = true;
 											}
 										}
@@ -422,6 +429,7 @@ function _list(x, y, w, h) {
 								if (selItems && selItems.Count) {
 									// Warn about dead items
 									selItems.Convert().some((handle) => {
+										console.log(handle.RawPath)
 										if (!handle.Path.startsWith('http://') && !handle.Path.startsWith('https://') && !_isFile(handle.Path)) {
 											fb.ShowPopupMessage('Warning! There is at least one dead item amongst the tracks on current selection, there may be more.\n\n' + handle.RawPath, window.Name); 
 											return true;
@@ -1575,7 +1583,7 @@ function _list(x, y, w, h) {
 			if (!this.playlistsPath.endsWith('\\')) {
 				this.playlistsPath += '\\';
 				this.playlistsPathDirName = this.playlistsPath.split('\\').filter(Boolean).pop();
-				this.playlistsPathDisk = this.playlistsPath.split('\\').filter(Boolean)[0].replace(':','').toUpperCase();
+				this.colours['playlistsPath'] = this.playlistsPath;
 				bDone = true;
 			}
 			// Check playlist extension
@@ -1741,9 +1749,8 @@ function _list(x, y, w, h) {
 	this.filename = '';
 	this.totalFileSize = 0; // Stores the file size of all playlists for later comparison when autosaving
 	this.properties = getPropertiesPairs(properties, prefix); // Load once! [0] = descriptions, [1] = values set by user (not defaults!)
-	this.playlistsPath = this.properties['playlistPath'][1].startsWith('.') ? findRelPathInAbsPath(this.properties['playlistPath'][1]) : this.properties['playlistPath'][1];
+	this.playlistsPath = this.properties['playlistPath'][1];
 	this.playlistsPathDirName = this.playlistsPath.split('\\').filter(Boolean).pop();
-	this.playlistsPathDisk = this.playlistsPath.split('\\').filter(Boolean)[0].replace(':','').toUpperCase();
 	this.playlistsExtension = this.properties['extension'][1];
 	this.bShowSize = this.properties['bShowSize'][1];
 	this.bUpdateAutoplaylist = this.properties['bUpdateAutoplaylist'][1]; // Forces AutoPlaylist size update on startup according to query. Requires also this.bShowSize = true!

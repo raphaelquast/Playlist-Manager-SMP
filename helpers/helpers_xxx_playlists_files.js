@@ -49,9 +49,15 @@ function savePlaylist(playlistIndex, playlistPath, extension = '.m3u8', playlist
 				if (relPath.length) { // Relative path conversion
 					let trackPath = '';
 					let trackInfo = '';
+					let cache = '';
 					trackText = trackText.map((item, i) => {
 						[trackInfo, trackPath] = item.split('\n');
-						trackPath = getRelPath(trackPath, relPathSplit);
+						relPathSplit.forEach((folder) => {
+							cache = trackPath.replace(folder + '\\', '');
+							if (trackPath === cache) {trackPath = '..\\' + trackPath;}
+							else {trackPath = cache;}
+						});
+						if (!trackPath.startsWith('..\\')) {trackPath = '.\\' + trackPath;}
 						return trackInfo + '\n' + trackPath;
 					});
 				}
@@ -74,9 +80,15 @@ function savePlaylist(playlistIndex, playlistPath, extension = '.m3u8', playlist
 				if (relPath.length) { // Relative path conversion
 					let trackPath = '';
 					let trackInfo = '';
+					let cache = '';
 					trackText = trackText.map((item, i) => {
 						[trackPath, ...trackInfo] = item.split('\n');
-						trackPath = getRelPath(trackPath, relPathSplit);
+						relPathSplit.forEach((folder) => {
+							cache = trackPath.replace(folder + '\\', '');
+							if (trackPath === cache) {trackPath = '..\\' + trackPath;}
+							else {trackPath = cache;}
+						});
+						if (!trackPath.startsWith('..\\')) {trackPath = '.\\' + trackPath;}
 						return trackInfoPre + trackPath + '\n' + trackInfo.join('\n');
 					});
 				}
@@ -160,11 +172,15 @@ function addHandleToPlaylist(handleList, playlistPath, relPath = '') {
 				if (relPath.length) { // Relative path conversion
 					let trackPath = '';
 					let trackInfo = '';
+					let cache = '';
 					newTrackText = newTrackText.map((item, i) => {
 						[trackInfo, trackPath] = item.split('\n');
-						trackPath = getRelPath(trackPath, relPathSplit);
-						console.log(relPathSplit);
-						console.log(trackPath);
+						relPathSplit.forEach((folder) => {
+							cache = trackPath.replace(folder + '\\', '');
+							if (trackPath === cache) {trackPath = '..\\' + trackPath;}
+							else {trackPath = cache;}
+						});
+						if (!trackPath.startsWith('..\\')) {trackPath = '.\\' + trackPath;}
 						return trackInfo + '\n' + trackPath;
 					});
 				}
@@ -182,9 +198,15 @@ function addHandleToPlaylist(handleList, playlistPath, relPath = '') {
 				if (relPath.length) { // Relative path conversion
 					let trackPath = '';
 					let trackInfo = '';
+					let cache = '';
 					newTrackText = newTrackText.map((item, i) => {
 						[trackPath, ...trackInfo] = item.split('\n');
-						trackPath = getRelPath(trackPath, relPathSplit);
+						relPathSplit.forEach((folder) => {
+							cache = trackPath.replace(folder + '\\', '');
+							if (trackPath === cache) {trackPath = '..\\' + trackPath;}
+							else {trackPath = cache;}
+						});
+						if (!trackPath.startsWith('..\\')) {trackPath = '.\\' + trackPath;}
 						return trackInfoPre + trackPath + '\n' + trackInfo.join('\n');
 					});
 				}
@@ -293,24 +315,21 @@ function getRelPaths(pathArr, relPath = '') {
 	if (isArrayStrings(pathArr)) {
 		if (relPath.length) { // Relative path conversion
 			const relPathSplit = relPath.length ? relPath.split('\\').filter(Boolean) : null;
+			let itemPath = '';
+			let cache = '';
 			relPathArr = pathArr.map((item, i) => {
-				return getRelPath(item, relPathSplit);
+				itemPath = item;
+				relPathSplit.forEach((folder) => {
+					cache = itemPath.replace(folder + '\\', '');
+					if (itemPath === cache) {itemPath = '..\\' + itemPath;}
+					else {itemPath = cache;}
+				});
+				if (!itemPath.startsWith('..\\')) {itemPath = '.\\' + itemPath;}
+				return itemPath;
 			});
 		}
 	}
 	return relPathArr;
-}
-
-function getRelPath(itemPath, relPathSplit) {
-	let cache = '';
-	relPathSplit.forEach((folder, j) => {
-		const level = new RegExp(folder + '\\\\', 'i')
-		cache = itemPath.replace(level, '');
-		if (itemPath === cache) {itemPath = '..\\' + cache;}
-		else {itemPath = cache;}
-	});
-	if (!itemPath.startsWith('..\\')) {itemPath = '.\\' + itemPath;}
-	return itemPath;
 }
 
 // Loading m3u, m3u8 & pls playlist files is really slow when there are many files
